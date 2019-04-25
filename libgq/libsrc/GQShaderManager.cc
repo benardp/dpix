@@ -262,7 +262,11 @@ void GQShaderManager::checkHardwareCompatibility()
 
 void GQShaderManager::initialize()
 {
+    reportGLError(__FILE__,__LINE__);
+
     checkHardwareCompatibility();
+
+    reportGLError(__FILE__,__LINE__);
 
     if (_status == GQ_SHADERS_OK) 
         qFatal("GQShaderManager::initialize() called on initialized object");
@@ -282,6 +286,8 @@ void GQShaderManager::initialize()
         qFatal("GQShaderManager::initialize(): %s", qPrintable(parse_errors));
 
     file.close();
+
+    reportGLError(__FILE__,__LINE__);
 
     QDomElement shader_root = shader_doc.documentElement();
     QDomElement program_element = shader_root.firstChildElement();
@@ -327,7 +333,7 @@ void GQShaderManager::initialize()
                 assert(source_element.tagName() == "source");
 		
                 QString shaderfile = loadShaderFile(program_name, source_element.attribute("filename"));
-                source_files[num_source_files] = shaderfile.toAscii();
+                source_files[num_source_files] = shaderfile. toLatin1();
                 p_source_files[num_source_files] = source_files[num_source_files].data();
                 num_source_files++;
 
@@ -388,6 +394,8 @@ QString GQShaderManager::loadShaderFile( const QString& programname, const QStri
 
 GQShaderRef GQShaderManager::bindProgram( const QString& name )
 {
+    reportGLError(__FILE__,__LINE__);
+
     if (_current_program_ref_count > 0)
     {
         unbindProgram(_current_program_ref_guid);
@@ -408,7 +416,7 @@ GQShaderRef GQShaderManager::bindProgram( const QString& name )
     _current_program = program_index;
     _current_program_name = name;
 
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 
     incProgramRefGuid();
     _current_program_ref_count = 1;
@@ -447,7 +455,7 @@ int GQShaderManager::uniformLocation(int program_ref_guid,
         loc = glGetUniformLocation(_programs[_current_program], 
                                    qPrintable(name) );
        
-        reportGLError();
+        reportGLError(__FILE__,__LINE__);
     }
     return loc;
 }
@@ -461,7 +469,7 @@ int GQShaderManager::attribLocation(int program_ref_guid,
     {
         loc = glGetAttribLocation(_programs[_current_program], 
                                   qPrintable(name) );
-        reportGLError();
+        reportGLError(__FILE__,__LINE__);
     }
     return loc;
 }
@@ -510,7 +518,7 @@ bool GQShaderManager::bindNamedTexture(int program_ref_guid,
         texture->bind();
 
         //qWarning("binding %s on unit %d\n", qPrintable(name), tex_unit);
-        reportGLError();
+        reportGLError(__FILE__,__LINE__);
         return true;
     }
     return false;
@@ -696,7 +704,7 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
         if (gl_type >= 0)
         {
             glProgramParameteriEXT(program_handle, GL_GEOMETRY_INPUT_TYPE_EXT, gl_type);
-            reportGLError();
+            reportGLError(__FILE__,__LINE__);
         }
         else
         {
@@ -718,7 +726,7 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
             // Currently, only POINTS, LINE_STRIP, and TRIANGLE_STRIP are supported
             // as output types. 
             glProgramParameteriEXT(program_handle, GL_GEOMETRY_OUTPUT_TYPE_EXT, gl_type);
-            reportGLError();
+            reportGLError(__FILE__,__LINE__);
         }
         else
         {
@@ -738,7 +746,7 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
         if (vertices > 0)
         {
             glProgramParameteriEXT(program_handle, GL_GEOMETRY_VERTICES_OUT_EXT, vertices);
-            reportGLError();
+            reportGLError(__FILE__,__LINE__);
         }
         else
         {

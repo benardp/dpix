@@ -298,7 +298,7 @@ void NPRSegmentAtlas::drawClipBuffer( const NPRScene& scene )
 
     NPRGLDraw::handleGLError();
     NPRGLDraw::clearGLState();
-    NPRGLDraw::clearGLScreen(vec(0,0,0), 1.0);
+//    NPRGLDraw::clearGLScreen(vec(0,0,0), 1.0);
 
     GQShaderRef shader = GQShaderManager::bindProgram("clip_buffer");
 
@@ -427,7 +427,7 @@ void NPRSegmentAtlas::sumSegmentLengths()
     NPRGLDraw::handleGLError();
 
     NPRGLDraw::clearGLState();
-    NPRGLDraw::clearGLScreen(vec(0,0,0), 1.0);
+//    NPRGLDraw::clearGLScreen(vec(0,0,0), 1.0);
 
     GQShaderRef shader = GQShaderManager::bindProgram("clip_buffer_sum");
 
@@ -553,6 +553,8 @@ void NPRSegmentAtlas::drawSegmentAtlas(AtlasBufferId target,
 
     glLineWidth(1.0f);
     glPointSize(1.0f);
+
+    NPRGLDraw::handleGLError();
 
     _atlas_source_vbo.bind(shader);
 

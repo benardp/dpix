@@ -295,7 +295,7 @@ void GQVertexBufferSet::copyToVBOs()
                      buf.dataPointer(), buf._gl_usage_mode);
         glBindBuffer(target, 0);
     }
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 void GQVertexBufferSet::deleteVBOs()
@@ -304,7 +304,7 @@ void GQVertexBufferSet::deleteVBOs()
     {
         _buffers[i].deleteVBO();
     }
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 bool GQVertexBufferSet::vbosLoaded() const
@@ -327,7 +327,7 @@ void GQVertexBufferSet::bind() const
         }
     }
     _bound_guids[_guid] = 1;
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 void GQVertexBufferSet::bind( const GQShaderRef& current_shader ) const
@@ -358,15 +358,17 @@ void GQVertexBufferSet::bind( const GQShaderRef& current_shader ) const
             }
 #endif
         }
-        reportGLError();
+        reportGLError(__FILE__,__LINE__);
     }
     _bound_guids[_guid] = 1;
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 
 void GQVertexBufferSet::unbind() const
 {
+    reportGLError(__FILE__,__LINE__);
+
     assert(_bound_guids.contains(_guid));
 
     for (int i = 0; i < _buffers.size(); i++)
@@ -377,7 +379,7 @@ void GQVertexBufferSet::unbind() const
         }
     }
 
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 
     _bound_guids.remove(_guid);
 }
@@ -524,7 +526,7 @@ void GQVertexBufferSet::copyFromSubFBO(const QString& vbo_name,
     glReadPixels(x, y, width, height, format, data_type, 0);
     glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 void GQVertexBufferSet::BufferInfo::init(const QString& name, int usage_mode, 

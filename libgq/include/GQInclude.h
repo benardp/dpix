@@ -16,8 +16,8 @@ See the COPYING file for details.
 #define _GQ_INCLUDE_H_
 
 #ifdef DARWIN
-#    include <GLee.h>
-#    include <glu.h>
+#   include <OpenGL/gl.h>
+#   include <OpenGL/glu.h>
 #endif
 #ifdef LINUX
 #    include <QVariant>
@@ -84,13 +84,12 @@ static inline XForm<T> transpose(const XForm<T> &xf)
                     xf[3], xf[7], xf[11], xf[15]);
 }
 
-inline void reportGLError()
+inline void reportGLError(const char* filename, int line)
 {
     GLint error = glGetError();
     if (error != 0)
     {
-        qCritical("GL Error: %s\n", gluErrorString(error));
-        qFatal("GL Error: %s\n", gluErrorString(error));
+        qCritical("GL Error: %s in %s (l. %d)\n", gluErrorString(error), filename, line);
     }
 }
 

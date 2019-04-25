@@ -26,6 +26,7 @@ See the COPYING file for details.
 #include <QDir>
 #include <QDebug>
 #include <QMouseEvent>
+#include <manipulatedCameraFrame.h>
 
 const QString GLViewer::lightPresetNames[] = { "Headlight",
     "North", "North-Northeast", "Northeast", "East-Northeast", "East", "East-Southeast", "Southeast", "South-Southeast",
@@ -184,16 +185,19 @@ void GLViewer::draw()
     
     in_draw_function = true;
 
+    reportGLError(__FILE__,__LINE__);
+
     GQStats& perf = GQStats::instance();
     if (_reset_timers_each_frame)
         perf.reset();
 
     setupLighting();
 
+
     xform cam_xf = xform(camera()->frame()->matrix());
     _npr_scene->setCameraTransform(cam_xf);
 
-    vec fp;
+    qreal fp[3];
     _focus_frame.getTranslation( fp[0], fp[1], fp[2] );
     _npr_scene->setFieldOfView(camera()->fieldOfView());
     _npr_scene->setFocalPoint( fp );
@@ -207,6 +211,8 @@ void GLViewer::draw()
         perf.updateView();
     }
 
+    reportGLError(__FILE__,__LINE__);
+
     in_draw_function = false;
 }
 
@@ -219,7 +225,7 @@ void GLViewer::forceFullRedraw()
         GQStats::instance().clearTimers();
         GQStats::instance().clearCounters();
     }
-    updateGL();
+    update();
 }
 
 void GLViewer::forceExtractLines()
@@ -259,7 +265,7 @@ void GLViewer::mousePressEvent( QMouseEvent* e )
     {
         _focus_dragging = true;
         setFocalPoint( e->pos() );
-        updateGL();
+        update();
     }
     else if (e->button() == Qt::LeftButton && e->modifiers() == Qt::AltModifier)
     {
@@ -292,7 +298,7 @@ void GLViewer::mouseMoveEvent( QMouseEvent* e )
     if (_focus_dragging)
     {
         setFocalPoint( e->pos() );
-        updateGL();
+        update();
     }
     else
     {
@@ -327,7 +333,7 @@ void GLViewer::keyPressEvent( QKeyEvent* e )
 
         if (_focus_paths[path])
         {
-            connect( _focus_paths[path], SIGNAL(interpolated()), SLOT(updateGL()) );
+            connect( _focus_paths[path], SIGNAL(interpolated()), SLOT(update()) );
             _focus_paths[path]->startInterpolation();
         }
     }

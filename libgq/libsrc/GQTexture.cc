@@ -326,6 +326,8 @@ bool GQTexture3D::create(int width, int height, int depth,
 bool GQTexture3D::genTexture(int internal_format, int format, 
                              int type, const void *data)
 {
+    reportGLError(__FILE__,__LINE__);
+
     int target = GL_TEXTURE_3D;
     int wrap_mode = GL_REPEAT;
     int filter_mag_mode = GL_LINEAR;

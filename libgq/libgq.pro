@@ -10,6 +10,7 @@ DESTDIR = $${DBGNAME}
 
 win32 {
 	TEMPLATE = vclib
+    DEFINES += _CRT_SECURE_NO_WARNINGS
 }
 else {
 	TEMPLATE = lib
@@ -17,7 +18,7 @@ else {
 
 	macx {
 		DEFINES += DARWIN
-        QMAKE_CXXFLAGS += -fopenmp
+                DEFINES += GL_SILENCE_DEPRECATION
 	}
 	else {
 		DEFINES += LINUX
@@ -35,7 +36,9 @@ INCLUDEPATH += include ../libcda/include
 #Input
 HEADERS += include/GQ*.h
 SOURCES += libsrc/GQ*.cc
-SOURCES += libsrc/GLee.c
+win32 {
+    SOURCES += libsrc/GLee.c
+}
 
 # Trimesh2
 INCLUDEPATH += ../trimesh2/include

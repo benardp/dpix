@@ -219,6 +219,8 @@ void NPRRendererStandard::drawDepthBuffer( const NPRScene& scene )
         _depth_buffer.bind();
         NPRGLDraw::clearGLScreen(vec(1,1,1), 1);
         _depth_buffer.unbind();
+
+        reportGLError(__FILE__,__LINE__);
     }
 }
 

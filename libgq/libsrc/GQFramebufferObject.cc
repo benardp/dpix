@@ -377,7 +377,7 @@ void GQFramebufferObject::readSubColorTexturei( int which, int x, int y, int wid
     glReadPixels( x, y, width, height, format, GL_UNSIGNED_BYTE, image.raster() );
     glReadBuffer( last_buffer );
 
-    reportGLError();
+    reportGLError(__FILE__,__LINE__);
 }
 
 void GQFramebufferObject::readSubColorTexturef( int which, int x, int y, int width, int height,
@@ -511,7 +511,7 @@ bool GQSingleFBO::init( int target, int format, uint32 attachments,
         }
         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
 
-        reportGLError();
+        reportGLError(__FILE__,__LINE__);
 
         GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
         if (status != GL_FRAMEBUFFER_COMPLETE_EXT)

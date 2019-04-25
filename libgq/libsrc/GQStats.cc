@@ -41,6 +41,7 @@ bool GQStats::init()
 
 void GQStats::clear()
 {
+    beginResetModel();
     for (int i = 0; i < NUM_CATEGORIES; i++)
     {
         _records[i].clear();
@@ -52,11 +53,12 @@ void GQStats::clear()
 
     _layout_changed = false;
     _data_changed = false;
-    QAbstractItemModel::reset();
+    endResetModel();
 }
 
 void GQStats::clearCategory( GQStats::Category which )
 {
+    beginResetModel();
     _records[which].clear();
     _headers[which].children.clear();
 
@@ -69,7 +71,7 @@ void GQStats::clearCategory( GQStats::Category which )
 
     _layout_changed = false;
     _data_changed = false;
-    QAbstractItemModel::reset();
+    endResetModel();
 }
 
 void GQStats::reset()
@@ -115,9 +117,10 @@ void GQStats::updateView()
 {
     if (_layout_changed)
     {
-        QAbstractItemModel::reset();
+        beginResetModel();
         _layout_changed = false;
         _data_changed = false;
+        endResetModel();
     }
     else if (_data_changed)
     {
@@ -191,7 +194,7 @@ void GQStats::removeTimer( int which )
     Record* timer = &(_records[TIMER][which]);
     assert( timer->children.size() == 0 );
     Record* parent = &_headers[TIMER];
-    if (timer->parent >= 0)
+    if (timer->parent != nullptr)
     {
         parent = timer->parent;
     }

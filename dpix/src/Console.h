@@ -39,7 +39,7 @@ public slots:
     void getProcessStdout();
 
 protected:
-    static void msgHandler( QtMsgType type, const char* msg );
+    static void msgHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg );
 
 protected:
     QProcess _process;

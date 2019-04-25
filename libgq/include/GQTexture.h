@@ -14,8 +14,8 @@ See the COPYING file for details.
 #ifndef _GQ_TEXTURE_H_
 #define _GQ_TEXTURE_H_
 
-#include "GQImage.h"
 #include "GQInclude.h"
+#include "GQImage.h"
 
 #include <QString>
 

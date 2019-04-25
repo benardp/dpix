@@ -43,7 +43,6 @@ void NPRGLDraw::handleGLError(const char* file, int line)
             errormsg = errormsg + QString(" (in %1:%2)").arg(file).arg(line);
 
         qCritical("%s\n", qPrintable(errormsg));
-        qFatal("%s\n", qPrintable(errormsg));
     }
 } 
 
@@ -57,7 +56,7 @@ void NPRGLDraw::drawMesh(const NPRScene& scene, int which, int draw_mode )
 
 void NPRGLDraw::drawMeshes(const NPRScene& scene, const QList<int>* list, int draw_mode )
 {
-    const NPRGeometry* current_geom = 0;
+    const NPRGeometry* current_geom = nullptr;
     int count = (list) ? list->size() : scene.numDrawables();
     for (int i = 0; i < count; i++)
     {
@@ -524,6 +523,8 @@ int NPRGLDraw::drawDepthBufferFBO(const NPRScene& scene,
 
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,fbo.width(), fbo.height());
+
+    reportGLError(__FILE__,__LINE__);
 	
     NPRGLDraw::clearGLState();
     GQShaderRef shader = GQShaderManager::bindProgram("float_depth_buffer");
@@ -554,6 +555,7 @@ void NPRGLDraw::clearGLScreen(const vec& color, float depth)
     glClearColor(color[0], color[1], color[2], 0.0);
     glClearDepth(depth);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    reportGLError(__FILE__,__LINE__);
 }
 
 void NPRGLDraw::clearGLDepth(float depth)
@@ -565,6 +567,8 @@ void NPRGLDraw::clearGLDepth(float depth)
 
 void NPRGLDraw::clearGLState()
 {
+    reportGLError(__FILE__,__LINE__);
+
     glDisable(GL_DITHER);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -589,6 +593,8 @@ void NPRGLDraw::clearGLState()
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
     }
     glActiveTexture(GL_TEXTURE0);
+
+    reportGLError(__FILE__,__LINE__);
 }
 
 void NPRGLDraw::setUniformSSParams(const GQShaderRef& shader,

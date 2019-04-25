@@ -12,6 +12,8 @@ See the COPYING file for details.
 #include <QtGui>
 #include <QFileDialog>
 #include <QRegExp>
+#include <QMessageBox>
+#include <QColorDialog>
 
 #include "GLViewer.h"
 #include "MainWindow.h"
@@ -393,7 +395,7 @@ void MainWindow::on_actionSave_Scene_As_triggered()
 void MainWindow::on_actionReload_Shaders_triggered()
 {
     GQShaderManager::reload();
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionLighting_Lambertian_triggered()
@@ -465,25 +467,25 @@ void MainWindow::on_focus3DButton_clicked()
 void MainWindow::on_farSlider_valueChanged( int value )
 {
     getCurrentStyle()->transferRef( (NPRStyle::TransferFunc)_currentTransferIndex ).vfar = (float)value / 100;
-    _glViewer->updateGL(); 
+    _glViewer->update();
 }
 
 void MainWindow::on_nearSlider_valueChanged( int value )
 {
     getCurrentStyle()->transferRef( (NPRStyle::TransferFunc)_currentTransferIndex ).vnear = (float)value / 100;
-    _glViewer->updateGL(); 
+    _glViewer->update();
 }
 
 void MainWindow::on_v1Slider_valueChanged( int value )
 {
     getCurrentStyle()->transferRef( (NPRStyle::TransferFunc)_currentTransferIndex ).v1 = (float)value / 100;
-    _glViewer->updateGL(); 
+    _glViewer->update();
 }
 
 void MainWindow::on_v2Slider_valueChanged( int value )
 {
     getCurrentStyle()->transferRef( (NPRStyle::TransferFunc)_currentTransferIndex ).v2 = (float)value / 100;
-    _glViewer->updateGL(); 
+    _glViewer->update();
 }
 
 void MainWindow::on_transferComboBox_currentIndexChanged( int index )
@@ -770,7 +772,7 @@ void MainWindow::on_actionCamera_Perspective_toggled(bool checked)
     else {
         _glViewer->camera()->setType(qglviewer::Camera::ORTHOGRAPHIC);
     }
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionSave_Screenshot_triggered()
@@ -782,37 +784,37 @@ void MainWindow::on_lightingPositionComboBox_activated(int index)
 {
     if (index >= 0 && index < GLViewer::NUM_LIGHT_PRESETS) {
         _glViewer->setLightPreset((GLViewer::LightPreset)index);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
 void MainWindow::on_lightingDepthSlider_valueChanged(int value)
 {
     _glViewer->setLightDepth((float)value / 1000.0f);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionLighting_Ambient_Component_toggled( bool checked )
 {
     _npr_scene->light(0)->setEnableAmbient(checked);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionLighting_Diffuse_Component_toggled( bool checked )
 {
     _npr_scene->light(0)->setEnableDiffuse(checked);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 void MainWindow::on_actionLighting_Specular_Component_toggled( bool checked )
 {
     _npr_scene->light(0)->setEnableSpecular(checked);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionEnable_Lighting_toggled( bool checked )
 {
     setBoolSetting(NPR_ENABLE_LIGHTING, checked);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionUse_VBOs_for_Geometry_toggled( bool checked )
@@ -820,14 +822,14 @@ void MainWindow::on_actionUse_VBOs_for_Geometry_toggled( bool checked )
     setBoolSetting(NPR_ENABLE_VBOS, checked);
     if (_npr_scene)
         _npr_scene->updateVBOs();
-    _glViewer->updateGL();
+    _glViewer->update();
 }
     
 void MainWindow::setFoV(float degrees)
 {
     _glViewer->camera()->setFieldOfView( degrees * ( 3.1415926f / 180.0f ) );
     _npr_scene->setFieldOfView(degrees * ( 3.1415926f / 180.0f ) );
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_actionPaper_Texture_triggered()
@@ -839,7 +841,7 @@ void MainWindow::on_actionPaper_Texture_triggered()
     {
         getCurrentStyle()->loadPaperTexture(filename);
         updateUiFromStyle();
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -852,7 +854,7 @@ void MainWindow::on_actionBackground_Texture_triggered()
     {
         getCurrentStyle()->loadBackgroundTexture(filename);
         updateUiFromStyle();
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -861,7 +863,7 @@ void MainWindow::on_actionDraw_Paper_Texture_toggled( bool checked )
     if (_ui.actionDraw_Paper_Texture->isEnabled())
     {
         NPRSettings::instance().set(NPR_ENABLE_PAPER_TEXTURE, checked);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -870,7 +872,7 @@ void MainWindow::on_actionDraw_Background_Texture_toggled( bool checked )
     if (_ui.actionDraw_Background_Texture->isEnabled())
     {
         NPRSettings::instance().set(NPR_ENABLE_BACKGROUND_TEXTURE, checked);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -891,7 +893,7 @@ void MainWindow::on_actionBackground_Color_triggered()
     {
         vec color = vec(qc.redF(), qc.greenF(), qc.blueF());
         getCurrentStyle()->setBackgroundColor(color);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -904,7 +906,7 @@ void MainWindow::on_actionPen_Color_triggered()
     {
         vec color = vec(qc.redF(), qc.greenF(), qc.blueF());
         getCurrentStyle()->penStyle(0)->setColor(color);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -1141,7 +1143,7 @@ void MainWindow::on_penWidthBox_valueChanged(double value)
     getCurrentStyle()->penStyle(name)->setStripWidth(value);
     _glViewer->forceFullRedraw();*/
     getCurrentStyle()->penStyle(0)->setStripWidth(value);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_penOpacityBox_valueChanged(double value)
@@ -1164,19 +1166,19 @@ void MainWindow::on_penLengthScaleBox_valueChanged(double value)
     getCurrentStyle()->penStyle(name)->setLengthScale(value);
     _glViewer->forceFullRedraw();*/
     getCurrentStyle()->penStyle(0)->setLengthScale(value);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_drawInvisibleCheckBox_toggled( bool value )
 {
     getCurrentStyle()->setDrawInvisibleLines(value);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_enableLineElisionCheckBox_toggled( bool value )
 {
     getCurrentStyle()->setEnableLineElision(value);
-    _glViewer->updateGL();
+    _glViewer->update();
 }
 
 void MainWindow::on_cameraInterpSpeedBox_valueChanged( double value )
@@ -1199,7 +1201,7 @@ void MainWindow::changePenTexture(const QString& pen_style)
         QString rel_name = _working_dir.absoluteFilePath(filename);
 
         getCurrentStyle()->penStyle(pen_style)->setTexture(rel_name);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -1210,7 +1212,7 @@ void MainWindow::changePenColor(const QString& pen_style)
     {
         vec color = vec(qc.redF(), qc.greenF(), qc.blueF());
         getCurrentStyle()->penStyle(pen_style)->setColor(color);
-        _glViewer->updateGL();
+        _glViewer->update();
     }
 }
 
@@ -1287,7 +1289,7 @@ QString MainWindow::myFileDialog( int mode, const QString& caption, const QStrin
 
 void MainWindow::sceneUpdated() {
 	if (_session_state != SESSION_PLAYING) {
-		_glViewer->updateGL();
+        _glViewer->update();
 	}
 }
 

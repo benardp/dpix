@@ -97,3 +97,6 @@ Please see the COPYING file for license information.
 
 Forrester Cole, Michael Burns, Keith Morley, Adam Finkelstein, and Pierre
 Benard wrote the code.
+
+Updated to build with Qt 5.4 and libQGLViewer 2.7
+April 12 2019

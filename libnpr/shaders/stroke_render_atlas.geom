@@ -11,8 +11,6 @@ See the COPYING file for details.
 
 \*****************************************************************************/
 
-#extension GL_EXT_geometry_shader4 : enable
-
 uniform sampler2DRect path_start_end_ptrs;
 uniform sampler2DRect clip_vert_0_buffer;
 uniform sampler2DRect clip_vert_1_buffer;
