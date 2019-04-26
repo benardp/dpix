@@ -64,7 +64,15 @@ INCLUDEPATH += ../qglviewer src
 LIBS += -L../qglviewer/$${DBGNAME} -lqglviewer
 DEFINES += QGLVIEWER_STATIC
 
-LIBS += -lGLU
+win32 {
+
+} else {
+    macx {
+        LIBS +=-framework GLUT
+    }else {
+        LIBS += -lGLU
+    }
+}
 
 # Input
 HEADERS += src/*.h \

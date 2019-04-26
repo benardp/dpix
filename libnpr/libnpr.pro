@@ -39,3 +39,10 @@ INCLUDEPATH += ../libgq/include
 #Input
 HEADERS += include/*.h
 SOURCES += libsrc/*.cc
+
+OTHER_FILES += \
+    shaders/programs.xml \
+    shaders/*.vert \
+    shaders/*.frag \
+    shaders/*.glsl \
+    shaders/*.geom
