@@ -41,7 +41,6 @@ bool GQStats::init()
 
 void GQStats::clear()
 {
-    beginResetModel();
     for (int i = 0; i < NUM_CATEGORIES; i++)
     {
         _records[i].clear();
@@ -52,13 +51,11 @@ void GQStats::clear()
     _constant_stack.clear();
 
     _layout_changed = false;
-    _data_changed = false;
-    endResetModel();
+    _data_changed = false;   
 }
 
 void GQStats::clearCategory( GQStats::Category which )
 {
-    beginResetModel();
     _records[which].clear();
     _headers[which].children.clear();
 
@@ -71,7 +68,6 @@ void GQStats::clearCategory( GQStats::Category which )
 
     _layout_changed = false;
     _data_changed = false;
-    endResetModel();
 }
 
 void GQStats::reset()
@@ -117,10 +113,8 @@ void GQStats::updateView()
 {
     if (_layout_changed)
     {
-        beginResetModel();
         _layout_changed = false;
         _data_changed = false;
-        endResetModel();
     }
     else if (_data_changed)
     {
