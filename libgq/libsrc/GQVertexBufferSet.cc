@@ -18,22 +18,11 @@ QHash<int,int>      GQVertexBufferSet::_bound_guids;
 QHash<QString,int>  GQVertexBufferSet::_bound_buffers;
 
 GLenum kGlArrays[GQ_NUM_VERTEX_BUFFER_TYPES] = { GL_VERTEX_ARRAY, 
-                                       GL_NORMAL_ARRAY, 
-                                       GL_COLOR_ARRAY,
-                                       GL_TEXTURE_COORD_ARRAY,
-									   0, // GQ_INDEX 
-									   };
-
-/*void handleGLError()
-{
-    GLint error = glGetError();
-    if (error != 0)
-    {
-        qCritical("GQVertexBufferSet::handleGLError: %s\n", gluErrorString(error));
-        qFatal("GQVertexBufferSet::handleGLError: %s\n", gluErrorString(error));
-    }
-}*/
-
+                                                 GL_NORMAL_ARRAY,
+                                                 GL_COLOR_ARRAY,
+                                                 GL_TEXTURE_COORD_ARRAY,
+                                                 0, // GQ_INDEX
+                                               };
 
 void GQVertexBufferSet::clear()
 {
@@ -60,7 +49,7 @@ void GQVertexBufferSet::add( GQVertexBufferType semantic, int width,
 }
 
 void GQVertexBufferSet::add( GQVertexBufferType semantic, int width, 
-							const QVector<int>& data )
+                             const QVector<int>& data )
 {
     QString name = GQVertexBufferNames[semantic];
     add(name, width, data);
@@ -68,7 +57,7 @@ void GQVertexBufferSet::add( GQVertexBufferType semantic, int width,
 }
 
 void GQVertexBufferSet::add( GQVertexBufferType semantic, int width, 
-							const std::vector<int>& data )
+                             const std::vector<int>& data )
 {
     QString name = GQVertexBufferNames[semantic];
     add(name, width, data);
@@ -92,7 +81,7 @@ void GQVertexBufferSet::add( GQVertexBufferType semantic, int width,
 }
 
 void GQVertexBufferSet::add( GQVertexBufferType semantic, 
-                            const QVector<vec>& data )
+                             const QVector<vec>& data )
 {
     QString name = GQVertexBufferNames[semantic];
     add(name, data);
@@ -100,7 +89,7 @@ void GQVertexBufferSet::add( GQVertexBufferType semantic,
 }
 
 void GQVertexBufferSet::add( GQVertexBufferType semantic, 
-                            const std::vector<vec>& data )
+                             const std::vector<vec>& data )
 {
     QString name = GQVertexBufferNames[semantic];
     add(name, data);
@@ -108,7 +97,7 @@ void GQVertexBufferSet::add( GQVertexBufferType semantic,
 }
 
 void GQVertexBufferSet::add( GQVertexBufferType semantic, 
-                            const std::vector<vec2>& data )
+                             const std::vector<vec2>& data )
 {
     QString name = GQVertexBufferNames[semantic];
     add(name, data);
@@ -119,19 +108,19 @@ void GQVertexBufferSet::add( const QString& name, int width,
                              const QVector<float>& data )
 {
     BufferInfo newinfo;
-    newinfo.init(name, _gl_usage_mode, GL_FLOAT, 
-        width, data.size() / width, 
-        reinterpret_cast<const uint8*>(data.constData()));
+    newinfo.init(name, _gl_usage_mode, GL_FLOAT,
+                 width, data.size() / width,
+                 reinterpret_cast<const uint8*>(data.constData()));
     add(newinfo);
 }
 
 void GQVertexBufferSet::add( const QString& name, int width, 
-							const QVector<int>& data )
+                             const QVector<int>& data )
 {
     BufferInfo newinfo;
-    newinfo.init(name, _gl_usage_mode, GL_INT, 
-				 width, data.size() / width, 
-				 reinterpret_cast<const uint8*>(data.constData()));
+    newinfo.init(name, _gl_usage_mode, GL_INT,
+                 width, data.size() / width,
+                 reinterpret_cast<const uint8*>(data.constData()));
     add(newinfo);
 }
 
@@ -139,19 +128,19 @@ void GQVertexBufferSet::add( const QString& name, int width,
                              const QVector<uint8>& data )
 {
     BufferInfo newinfo;
-    newinfo.init(name, _gl_usage_mode, GL_UNSIGNED_BYTE, 
-        width, data.size() / width, 
-        reinterpret_cast<const uint8*>(data.constData()));
+    newinfo.init(name, _gl_usage_mode, GL_UNSIGNED_BYTE,
+                 width, data.size() / width,
+                 reinterpret_cast<const uint8*>(data.constData()));
     add(newinfo);
 }
 
 void GQVertexBufferSet::add(const QString& name, int width, 
-							const std::vector<int>& data )
+                            const std::vector<int>& data )
 {
-	BufferInfo newinfo;
-    newinfo.init(name, _gl_usage_mode, GL_INT, 
-				 width, data.size() / width, 
-				 reinterpret_cast<const uint8*>(&data[0]));
+    BufferInfo newinfo;
+    newinfo.init(name, _gl_usage_mode, GL_INT,
+                 width, data.size() / width,
+                 reinterpret_cast<const uint8*>(&data[0]));
     add(newinfo);
 }
 
@@ -169,8 +158,8 @@ void GQVertexBufferSet::add(const QString& name,
     BufferInfo newinfo;
     int width = 3;
     int length = data.size();
-    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length, 
-        reinterpret_cast<const uint8*>(data.constData()));
+    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length,
+                 reinterpret_cast<const uint8*>(data.constData()));
     add(newinfo);
 }
 
@@ -180,8 +169,8 @@ void GQVertexBufferSet::add(const QString& name,
     BufferInfo newinfo;
     int width = 3;
     int length = data.size();
-    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length, 
-        reinterpret_cast<const uint8*>(&data[0]));
+    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length,
+                 reinterpret_cast<const uint8*>(&data[0]));
     add(newinfo);
 }
 
@@ -191,8 +180,8 @@ void GQVertexBufferSet::add(const QString& name,
     BufferInfo newinfo;
     int width = 2;
     int length = data.size();
-    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length, 
-				 reinterpret_cast<const uint8*>(&data[0]));
+    newinfo.init(name, _gl_usage_mode, GL_FLOAT, width, length,
+                 reinterpret_cast<const uint8*>(&data[0]));
     add(newinfo);
 }
 
@@ -212,6 +201,7 @@ void GQVertexBufferSet::add( const BufferInfo& buffer_info )
         }
     }
     _buffers.push_back(buffer_info);
+    QString tmp = _buffers.last()._name;
     _buffer_hash[buffer_info._name] = &(_buffers.last());
 }
 
@@ -229,18 +219,18 @@ void GQVertexBufferSet::remove( const BufferInfo& buffer_info )
         }
     }
 }
-        
+
 void GQVertexBufferSet::setUsageMode(GQVertexBufferUsage usage_mode)
 {
     assert(!_bound_guids.contains(_guid));
 
     switch (usage_mode)
     {
-        case GQ_STATIC_DRAW: _gl_usage_mode = GL_STATIC_DRAW; break;
-        case GQ_DYNAMIC_DRAW: _gl_usage_mode = GL_DYNAMIC_DRAW; break;
-        case GQ_STREAM_DRAW: _gl_usage_mode = GL_STREAM_DRAW; break;
-        case GQ_STREAM_COPY: _gl_usage_mode = GL_STREAM_COPY; break;
-        default: assert(0); break;
+    case GQ_STATIC_DRAW: _gl_usage_mode = GL_STATIC_DRAW; break;
+    case GQ_DYNAMIC_DRAW: _gl_usage_mode = GL_DYNAMIC_DRAW; break;
+    case GQ_STREAM_DRAW: _gl_usage_mode = GL_STREAM_DRAW; break;
+    case GQ_STREAM_COPY: _gl_usage_mode = GL_STREAM_COPY; break;
+    default: assert(0); break;
     }
     for (int i = 0; i < _buffers.size(); i++)
     {
@@ -271,31 +261,32 @@ void GQVertexBufferSet::copyToVBOs()
     for (int i = 0; i < _buffers.size(); i++)
     {
         BufferInfo& buf = _buffers[i];
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
 
         if (buf._vbo_id < 0)
         {
             GLuint id;
-            glGenBuffers(1, &id);
-			// Check for a fishy buffer id. Mac driver sometimes
-			// returns crap values without raising a GL error.
-			if (id == 0 || id > 1000000)
-				qWarning("GQVertexBufferSet::copyToVBOs: possibly bogus buffer id: %d", id);
+            glFuncs.glGenBuffers(1, &id);
+            // Check for a fishy buffer id. Mac driver sometimes
+            // returns crap values without raising a GL error.
+            if (id == 0 || id > 1000000)
+                qWarning("GQVertexBufferSet::copyToVBOs: possibly bogus buffer id: %d", id);
             buf._vbo_id = (int)id;
         }
         if (buf._vbo_size <= 0)
         {
             buf._vbo_size = buf.dataSize();
         }
-		int target = GL_ARRAY_BUFFER;
-		if (buf._semantic == GQ_INDEX)
-			target = GL_ELEMENT_ARRAY_BUFFER;
-			
-        glBindBuffer(target, (GLuint)(buf._vbo_id));
-        glBufferData(target, buf._vbo_size, 
+        int target = GL_ARRAY_BUFFER;
+        if (buf._semantic == GQ_INDEX)
+            target = GL_ELEMENT_ARRAY_BUFFER;
+
+        glFuncs.glBindBuffer(target, (GLuint)(buf._vbo_id));
+        glFuncs.glBufferData(target, buf._vbo_size,
                      buf.dataPointer(), buf._gl_usage_mode);
-        glBindBuffer(target, 0);
+        glFuncs.glBindBuffer(target, 0);
     }
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 void GQVertexBufferSet::deleteVBOs()
@@ -304,7 +295,7 @@ void GQVertexBufferSet::deleteVBOs()
     {
         _buffers[i].deleteVBO();
     }
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 bool GQVertexBufferSet::vbosLoaded() const
@@ -321,13 +312,13 @@ void GQVertexBufferSet::bind() const
 
     for (int i = 0; i < _buffers.size(); i++)
     {
-        if (_buffers[i]._semantic < GQ_NUM_VERTEX_BUFFER_TYPES)
+        if (_buffers[i]._semantic == GQ_INDEX)
         {
             bindBuffer(_buffers[i], -1);
         }
     }
     _bound_guids[_guid] = 1;
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 void GQVertexBufferSet::bind( const GQShaderRef& current_shader ) const
@@ -336,11 +327,11 @@ void GQVertexBufferSet::bind( const GQShaderRef& current_shader ) const
 
     for (int i = 0; i < _buffers.size(); i++)
     {
-		// Don't use GL_ELEMENT_ARRAY_BUFFER when using client side draw arrays.
-		if (_buffers[i]._semantic == GQ_INDEX && _buffers[i]._vbo_id < 0)
-			continue;
-		
-        if (_buffers[i]._semantic < GQ_NUM_VERTEX_BUFFER_TYPES)
+        // Don't use GL_ELEMENT_ARRAY_BUFFER when using client side draw arrays.
+        if (_buffers[i]._semantic == GQ_INDEX && _buffers[i]._vbo_id < 0)
+            continue;
+        
+        if (_buffers[i]._semantic == GQ_INDEX)//GQ_NUM_VERTEX_BUFFER_TYPES)
         {
             bindBuffer(_buffers[i], -1);
         }
@@ -358,17 +349,15 @@ void GQVertexBufferSet::bind( const GQShaderRef& current_shader ) const
             }
 #endif
         }
-        reportGLError(__FILE__,__LINE__);
+        reportGLError();
     }
     _bound_guids[_guid] = 1;
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 
 void GQVertexBufferSet::unbind() const
 {
-    reportGLError(__FILE__,__LINE__);
-
     assert(_bound_guids.contains(_guid));
 
     for (int i = 0; i < _buffers.size(); i++)
@@ -379,7 +368,7 @@ void GQVertexBufferSet::unbind() const
         }
     }
 
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 
     _bound_guids.remove(_guid);
 }
@@ -387,66 +376,48 @@ void GQVertexBufferSet::unbind() const
 
 void GQVertexBufferSet::bindBuffer( const BufferInfo& info, int attrib ) const 
 {
-	int stride = info._type_size * info._width * _element_stride;
-	int offset = stride * _starting_element;
-	
-	int bind_target = GL_ARRAY_BUFFER;
-	if (info._semantic == GQ_INDEX)
-	{
-		assert(info._vbo_id >= 0);
-		bind_target = GL_ELEMENT_ARRAY_BUFFER;
-	}
+    int stride = info._type_size * info._width * _element_stride;
+    int offset = stride * _starting_element;
+    
+    int bind_target = GL_ARRAY_BUFFER;
+    if (info._semantic == GQ_INDEX)
+    {
+        assert(info._vbo_id >= 0);
+        bind_target = GL_ELEMENT_ARRAY_BUFFER;
+    }
 
-    const uint8* datap;	
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+
+    const uint8* datap;
     if (info._vbo_id >= 0)
     {
-        glBindBuffer(bind_target, info._vbo_id);
-		datap = reinterpret_cast<const uint8*>(offset);
+        glFuncs.glBindBuffer(bind_target, info._vbo_id);
+        datap = reinterpret_cast<const uint8*>(offset);
     }
     else
     {
-		glBindBuffer(bind_target, 0);
-        datap = info.dataPointer() + offset;	
+        glFuncs.glBindBuffer(bind_target, 0);
+        datap = info.dataPointer() + offset;
     }
 
     switch (info._semantic)
     {
-        case GQ_VERTEX : 
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(info._width, info._data_type, stride, 
-                            (const void*)(datap));
-            break;
-        case GQ_NORMAL : 
-            glEnableClientState(GL_NORMAL_ARRAY);
-            glNormalPointer(info._data_type, stride, 
-                            (const void*)(datap));
-            break;
-        case GQ_COLOR : 
-            glEnableClientState(GL_COLOR_ARRAY);
-            glColorPointer(info._width, info._data_type, stride, 
-                           (const void*)(datap));
-            break;
-        case GQ_TEXCOORD : 
-            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-            glTexCoordPointer(info._width, info._data_type, stride, 
+    case GQ_INDEX :
+        // No client state needs to change here.
+        break;
+    default:
+        assert(attrib >= 0);
+        glFuncs.glVertexAttribPointer(attrib, info._width, info._data_type,
+                              info._normalize, stride,
                               (const void*)(datap));
-            break;
-		case GQ_INDEX :
-			// No client state needs to change here.
-			break;
-        default:
-            assert(attrib >= 0);
-            glEnableVertexAttribArray(attrib);
-            glVertexAttribPointer(attrib, info._width, info._data_type, 
-                                  info._normalize, stride, 
-                                  (const void*)(datap));
-            break;
+        glFuncs.glEnableVertexAttribArray(attrib);
+        break;
     }
 
-	// Have to leave some VBO bound here (on mac),
-	// even if we have bound and set multiple VBOs or glDraw*
-	// will crash.
-	// glBindBuffer(bind_target, 0);
+    // Have to leave some VBO bound here (on mac),
+    // even if we have bound and set multiple VBOs or glDraw*
+    // will crash.
+    // glBindBuffer(bind_target, 0);
 
     _bound_buffers[info._name] = attrib;
 }
@@ -454,51 +425,52 @@ void GQVertexBufferSet::bindBuffer( const BufferInfo& info, int attrib ) const
 void GQVertexBufferSet::unbindBuffer( const BufferInfo& info ) const
 {
     int attrib = _bound_buffers[info._name];
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     if (attrib < 0)
     {
-		int client_state = kGlArrays[info._semantic];
-		if (client_state > 0)
-			glDisableClientState(client_state);
+        int client_state = kGlArrays[info._semantic];
+        if (client_state > 0)
+            glDisableClientState(client_state);
     }
     else
     {
-        glDisableVertexAttribArray(attrib);
+        glFuncs.glDisableVertexAttribArray(attrib);
     }
-	
-	int target = GL_ARRAY_BUFFER;
-	if (info._semantic == GQ_INDEX)
-		target = GL_ELEMENT_ARRAY_BUFFER;
-	glBindBuffer(target, 0);
     
-	_bound_buffers.remove(info._name);
+    int target = GL_ARRAY_BUFFER;
+    if (info._semantic == GQ_INDEX)
+        target = GL_ELEMENT_ARRAY_BUFFER;
+    glFuncs.glBindBuffer(target, 0);
+    
+    _bound_buffers.remove(info._name);
 }
 
 void GQVertexBufferSet::copyFromFBO(GQVertexBufferType vbo_semantic,
-									const GQFramebufferObject& fbo, 
+                                    const GQFramebufferObject& fbo,
                                     int fbo_buffer)
 {
     copyFromFBO(GQVertexBufferNames[vbo_semantic], fbo, fbo_buffer);
 }
 
 void GQVertexBufferSet::copyFromFBO(const QString& vbo_name,
-									const GQFramebufferObject& fbo, 
+                                    const GQFramebufferObject& fbo,
                                     int fbo_buffer)
 {
     copyFromSubFBO(vbo_name, fbo, fbo_buffer, 0, 0, fbo.width(), fbo.height());
 }
-        
+
 void GQVertexBufferSet::copyFromSubFBO(GQVertexBufferType vbo_semantic,
-									   const GQFramebufferObject& fbo, 
-                                       int fbo_buffer, int x, int y, 
+                                       const GQFramebufferObject& fbo,
+                                       int fbo_buffer, int x, int y,
                                        int width, int height)
 {
-    copyFromSubFBO(GQVertexBufferNames[vbo_semantic], fbo, fbo_buffer, 
-				   x, y, width, height);
+    copyFromSubFBO(GQVertexBufferNames[vbo_semantic], fbo, fbo_buffer,
+                   x, y, width, height);
 }
 
 void GQVertexBufferSet::copyFromSubFBO(const QString& vbo_name,
-									   const GQFramebufferObject& fbo, 
-                                       int fbo_buffer, int x, int y, 
+                                       const GQFramebufferObject& fbo,
+                                       int fbo_buffer, int x, int y,
                                        int width, int height)
 {
     assert(fbo.isBound());
@@ -521,12 +493,14 @@ void GQVertexBufferSet::copyFromSubFBO(const QString& vbo_name,
     else
         format = GL_RGBA;
 
-    glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, info->_vbo_id);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+
+    glFuncs.glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, info->_vbo_id);
     glReadBuffer(GL_COLOR_ATTACHMENT0_EXT + fbo_buffer);
     glReadPixels(x, y, width, height, format, data_type, 0);
-    glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+    glFuncs.glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 void GQVertexBufferSet::BufferInfo::init(const QString& name, int usage_mode, 
@@ -544,14 +518,14 @@ void GQVertexBufferSet::BufferInfo::init(const QString& name, int usage_mode,
     _length = length;
     _data_type = data_type;
     switch (data_type) {
-        case GL_FLOAT           : _type_size = sizeof(GLfloat); break;
-        case GL_DOUBLE          : _type_size = sizeof(GLdouble); break;
-		case GL_INT				: _type_size = sizeof(GLint); break;
-        case GL_UNSIGNED_BYTE   : _type_size = 1; break;
-        case GL_UNSIGNED_INT    : _type_size = sizeof(GLuint); break;
-        default: 
-            qFatal("GQVertexBufferSet::BufferInfo::init: unexpected data type"); 
-            break;
+    case GL_FLOAT           : _type_size = sizeof(GLfloat); break;
+    case GL_DOUBLE          : _type_size = sizeof(GLdouble); break;
+    case GL_INT             : _type_size = sizeof(GLint); break;
+    case GL_UNSIGNED_BYTE   : _type_size = 1; break;
+    case GL_UNSIGNED_INT    : _type_size = sizeof(GLuint); break;
+    default:
+        qFatal("GQVertexBufferSet::BufferInfo::init: unexpected data type");
+        break;
     }
     _gl_usage_mode = usage_mode;
     _vbo_id = -1;
@@ -565,12 +539,12 @@ const uint8* GQVertexBufferSet::BufferInfo::dataPointer() const
 {
     return _data_pointer;
 }
-            
+
 int GQVertexBufferSet::BufferInfo::dataSize() const
 {
     if (_data_pointer)
         return _type_size * _width * _length;
-    else 
+    else
         return 0;
 }
 
@@ -578,7 +552,8 @@ void GQVertexBufferSet::BufferInfo::deleteVBO()
 {
     if (_vbo_id >= 0)
     {
-        glDeleteBuffers(1, (GLuint*)(&_vbo_id));
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glDeleteBuffers(1, (GLuint*)(&_vbo_id));
     }
     _vbo_id = -1;
 }

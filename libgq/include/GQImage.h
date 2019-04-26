@@ -27,11 +27,23 @@ public:
     int chan()const   { return _num_chan; }
     unsigned char* raster() { return _raster; } 
     const unsigned char* raster() const { return _raster; } 
-	unsigned char pixel( int x, int y, int c ) const 
-        { return _raster[_num_chan * (x + y*_width) + c]; }
-	
-	void setPixelChannel( int x, int y, int c, unsigned char value );
-   
+    unsigned char* scanLine(int i) { return _raster + _num_chan * i * _width; }
+    const unsigned char* scanLine(int i) const { return _raster + _num_chan * i * _width; }
+    unsigned char pixel(float x, float y, int c)const
+    {
+        return pixel(int(x * (_width-1)), int(y * (_height - 1)), c);
+    }
+    unsigned char pixel( int x, int y, int c ) const
+    {
+        //qDebug("%d %d\n", _width, _num_chan * (x + y*_width) + c);
+        if (_raster)
+            return _raster[_num_chan * (x + y*_width) + c];
+        else
+            return 0;
+    }
+
+    void setPixelChannel( int x, int y, int c, unsigned char value );
+
     bool resize(int w, int h, int c);
     void copy( const GQImage& from )
     {
@@ -41,7 +53,7 @@ public:
 
     void clear();
 
-	bool save(const QString& filename, bool flip = true );
+    bool save(const QString& filename, bool flip = true );
     bool load(const QString& filename);
 
 private:
@@ -65,11 +77,15 @@ public:
     int chan()const   { return _num_chan; }
     float* raster() { return _raster; } 
     const float* raster() const { return _raster; } 
-	float  pixel( int x, int y, int c ) const 
-        { return _raster[_num_chan * (x + y*_width) + c]; }
-   
-	void setPixel( int x, int y, const float* pixel );
-	void setPixelChannel( int x, int y, int c, float value );
+
+    float* scanLine(int i) { return _raster + _num_chan * i * _width; }
+    const float* scanLine(int i) const { return _raster + _num_chan * i * _width; }
+
+    float  pixel( int x, int y, int c ) const
+    { return _raster[_num_chan * (x + y*_width) + c]; }
+
+    void setPixel( int x, int y, const float* pixel );
+    void setPixelChannel( int x, int y, int c, float value );
 
     bool resize(int w, int h, int c);
     void scaleValues( float factor );
@@ -81,7 +97,7 @@ public:
 
     void clear();
 
-	bool save(const QString& filename, bool flip = true );
+    bool save(const QString& filename, bool flip = true );
     bool load(const QString& filename);
 
 protected:
@@ -89,7 +105,7 @@ protected:
     bool savePFM(const QString& filename, bool flip);
     bool saveQImage(const QString& filename, bool flip);
 
-	bool loadPFM(const QString& filename);
+    bool loadPFM(const QString& filename);
 
 private:
     int _width;

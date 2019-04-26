@@ -34,10 +34,13 @@ else {
     else {
         DEFINES += LINUX
         UNAME = Linux
+        QMAKE_LFLAGS += -fopenmp
+        QMAKE_CXXFLAGS += -fopenmp
+        LIBS += -fopenmp
     }
 }
 
-QT += opengl xml
+QT += opengl xml openglextensions
 TARGET = dpix
 
 PRE_TARGETDEPS += ../libnpr/$${DBGNAME}/libnpr.a
@@ -61,10 +64,11 @@ INCLUDEPATH += ../qglviewer src
 LIBS += -L../qglviewer/$${DBGNAME} -lqglviewer
 DEFINES += QGLVIEWER_STATIC
 
+LIBS += -lGLU
+
 # Input
 HEADERS += src/*.h \
 
 FORMS += src/ui/*.ui
 
 SOURCES += src/*.cc \
-

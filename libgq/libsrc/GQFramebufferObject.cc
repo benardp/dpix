@@ -21,16 +21,28 @@ int GQFramebufferObject::_last_used_guid = 1;
 GQFramebufferObject::GQFramebufferObject()
 {
     _fbo = -1;
-    clear();
+    _gl_target = 0;
+    _gl_format = 0;
+    _format = -1;
+    _coordinates = -1;
+    _attachments = GQ_ATTACH_NONE;
+    _num_color_attachments = 0;
+    _color_attachments = NULL;
+    _width = -1;
+    _height = -1;
+    _guid = _last_used_guid++;
+    if (_guid == 0) _guid = _last_used_guid++;
 }
 
 GQFramebufferObject::~GQFramebufferObject()
 {
-    clear();
+    // Dirty but segfault due to OpenGL context already destroyed
+    // clear();
 }
 
 void GQFramebufferObject::clear()
 {
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     if (_fbo >= 0)
     {
         for (int i = 0; i < _num_color_attachments; i++) {
@@ -38,13 +50,13 @@ void GQFramebufferObject::clear()
         }
 
         delete _color_attachments;
-		
+        
         if (_depth_attachment >= 0)
         {
-            glDeleteRenderbuffersEXT(1, (GLuint*)(&_depth_attachment));
+            glFuncs.glDeleteRenderbuffers(1, (GLuint*)(&_depth_attachment));
         }
 
-        glDeleteFramebuffersEXT(1, (GLuint*)(&_fbo));
+        glFuncs.glDeleteFramebuffers(1, (GLuint*)(&_fbo));
 
         _fbo = -1;
     }
@@ -134,8 +146,9 @@ bool GQFramebufferObject::initGL(int target, int format,
         _attachments = attachments;
 
         // create the fbo
-        glGenFramebuffersEXT(1, (GLuint*)(&_fbo));
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glGenFramebuffers(1, (GLuint*)(&_fbo));
+        glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
         // attach the color buffers
         _num_color_attachments = num_color_attachments;
@@ -146,43 +159,43 @@ bool GQFramebufferObject::initGL(int target, int format,
             _color_attachments[i]->create(_width, _height, _gl_format, 
                     GL_RGBA, GL_UNSIGNED_BYTE, NULL, _gl_target);
 
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, 
-                    GL_COLOR_ATTACHMENT0_EXT + i, _gl_target, 
+            glFuncs.glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    GL_COLOR_ATTACHMENT0 + i, _gl_target,
                     _color_attachments[i]->id(), 0);
         }
-        glBindTexture( _gl_target, 0 );
-		
+        glFuncs.glBindTexture( _gl_target, 0 );
+        
         if ( _attachments & GQ_ATTACH_DEPTH)
         {
             // attach a depth buffer
-            glGenRenderbuffersEXT(1, (GLuint*)(&_depth_attachment));
-            glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, _depth_attachment);
-            glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, 
+            glFuncs.glGenRenderbuffers(1, (GLuint*)(&_depth_attachment));
+            glFuncs.glBindRenderbuffer(GL_RENDERBUFFER, _depth_attachment);
+            glFuncs.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
                     _width, _height);
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, 
-                    GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, 
+            glFuncs.glFramebufferRenderbuffer(GL_FRAMEBUFFER,
+                    GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                     _depth_attachment);
         }
         else
         {
             _depth_attachment = -1;
         }
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+        glFuncs.glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-        GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+        GLenum status = glFuncs.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE)
         {
             QString die_msg;
             die_msg.sprintf("Could not set up framebuffer object. Tried %dx%d, %d attachments, %d format, %d depth attachment",
                 _width, _height, _num_color_attachments, 
                 _gl_format, _attachments & GQ_ATTACH_DEPTH);
             qCritical("%s", qPrintable(die_msg));
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+            glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             clear();
             return false;
         }
 
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     return true;
 }
@@ -191,15 +204,16 @@ void GQFramebufferObject::bind(uint32 clear_behavior) const
 {
     assert(_fbo >= 0);
     assert(_bound_guid == 0);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT);
-	
-	if (clear_behavior == GQ_CLEAR_BUFFER)
-	{
-		drawToAllBuffers();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-	
+    
+    if (clear_behavior == GQ_CLEAR_BUFFER)
+    {
+        drawToAllBuffers();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+    
     _bound_guid = _guid;
 }
 
@@ -208,28 +222,30 @@ void GQFramebufferObject::unbind() const
     assert(_fbo >= 0);
     assert(_bound_guid == _guid);
     glPopAttrib();
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     _bound_guid = 0;
 }
 
 void GQFramebufferObject::drawBuffer( int which ) const
 {
-    assert( which >= 0 && which < _num_color_attachments );
-    glDrawBuffer( GL_COLOR_ATTACHMENT0_EXT + which );
+    assert( which >= 0 && which < _num_color_attachments);
+    glDrawBuffer( GL_COLOR_ATTACHMENT0 + which );
 }
 
 void GQFramebufferObject::drawToAllBuffers() const
 {
-    GLenum render_targets[] = { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT,
-                                GL_COLOR_ATTACHMENT2_EXT, GL_COLOR_ATTACHMENT3_EXT,
-                                GL_COLOR_ATTACHMENT4_EXT, GL_COLOR_ATTACHMENT5_EXT,
-                                GL_COLOR_ATTACHMENT6_EXT, GL_COLOR_ATTACHMENT7_EXT,
-                                GL_COLOR_ATTACHMENT8_EXT, GL_COLOR_ATTACHMENT9_EXT,
-                                GL_COLOR_ATTACHMENT10_EXT, GL_COLOR_ATTACHMENT11_EXT,
-                                GL_COLOR_ATTACHMENT12_EXT, GL_COLOR_ATTACHMENT13_EXT,
-                                GL_COLOR_ATTACHMENT14_EXT, GL_COLOR_ATTACHMENT15_EXT };
+    GLenum render_targets[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
+                                GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3,
+                                GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5,
+                                GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7,
+                                GL_COLOR_ATTACHMENT8, GL_COLOR_ATTACHMENT9,
+                                GL_COLOR_ATTACHMENT10, GL_COLOR_ATTACHMENT11,
+                                GL_COLOR_ATTACHMENT12, GL_COLOR_ATTACHMENT13,
+                                GL_COLOR_ATTACHMENT14, GL_COLOR_ATTACHMENT15 };
     assert(_num_color_attachments > 0 && _num_color_attachments < 16);
-    glDrawBuffers(_num_color_attachments, render_targets);
+    QOpenGLExtraFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glDrawBuffers(_num_color_attachments, render_targets);
 }
 
 GQTexture2D* GQFramebufferObject::colorTexture( int which )
@@ -330,7 +346,7 @@ void GQFramebufferObject::readColorTexturef( int which, GQFloatImage& image, int
     glGetTexImage( _gl_target, 0, format, GL_FLOAT, 
                    image.raster());
     _color_attachments[which]->unbind();
-}	
+}   
 
 void GQFramebufferObject::loadColorTexturei( int which, const GQImage& image )
 {
@@ -373,11 +389,11 @@ void GQFramebufferObject::readSubColorTexturei( int which, int x, int y, int wid
     GLint last_buffer;
     glGetIntegerv( GL_READ_BUFFER, &last_buffer );
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadBuffer( GL_COLOR_ATTACHMENT0_EXT + which );
+    glReadBuffer( GL_COLOR_ATTACHMENT0 + which );
     glReadPixels( x, y, width, height, format, GL_UNSIGNED_BYTE, image.raster() );
     glReadBuffer( last_buffer );
 
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 }
 
 void GQFramebufferObject::readSubColorTexturef( int which, int x, int y, int width, int height,
@@ -393,7 +409,7 @@ void GQFramebufferObject::readSubColorTexturef( int which, int x, int y, int wid
 
     GLint last_buffer;
     glGetIntegerv( GL_READ_BUFFER, &last_buffer );
-    glReadBuffer( GL_COLOR_ATTACHMENT0_EXT + which );
+    glReadBuffer( GL_COLOR_ATTACHMENT0 + which );
     glReadPixels( x, y, width, height, format, GL_FLOAT, image.raster() );
     glReadBuffer( last_buffer );
 }
@@ -444,7 +460,7 @@ int GQFramebufferObject::maxFramebufferSize()
 int GQFramebufferObject::maxColorAttachments()
 {
     GLint num;
-    glGetIntegerv( GL_MAX_COLOR_ATTACHMENTS_EXT, &num);
+    glGetIntegerv( GL_MAX_COLOR_ATTACHMENTS, &num);
     return num;
 }
 
@@ -480,8 +496,9 @@ bool GQSingleFBO::init( int target, int format, uint32 attachments,
         _attachments = attachments;
 
         // create the fbo
-        glGenFramebuffersEXT(1, (GLuint*)(&_fbo));
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, _fbo);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glGenFramebuffers(1, (GLuint*)(&_fbo));
+        glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
         // create the color buffers, but only bind the first
         _num_color_attachments = num_color_attachments;
@@ -492,37 +509,37 @@ bool GQSingleFBO::init( int target, int format, uint32 attachments,
             _color_attachments[i]->create(_width, _height, _gl_format, GL_RGBA, GL_UNSIGNED_BYTE, NULL, _gl_target);
         }
 
-        glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, _gl_target, _color_attachments[0]->id(), 0);
+        glFuncs.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _gl_target, _color_attachments[0]->id(), 0);
         _current_color_attachment = 0;
 
         glBindTexture( _gl_target, 0 );
-		
+        
         if ( _attachments & GQ_ATTACH_DEPTH)
         {
             // attach a depth buffer
-            glGenRenderbuffersEXT(1, (GLuint*)(&_depth_attachment));
-            glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, _depth_attachment);
-            glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, _width, _height);
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, _depth_attachment);
+            glFuncs.glGenRenderbuffers(1, (GLuint*)(&_depth_attachment));
+            glFuncs.glBindRenderbuffer(GL_RENDERBUFFER, _depth_attachment);
+            glFuncs.glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
+            glFuncs.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depth_attachment);
         }
         else
         {
             _depth_attachment = -1;
         }
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+        glFuncs.glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-        reportGLError(__FILE__,__LINE__);
+        reportGLError();
 
-        GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-        if (status != GL_FRAMEBUFFER_COMPLETE_EXT)
+        GLenum status = glFuncs.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE)
         {
             qCritical("Could not set up frame buffer object.");
-            glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+            glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             clear();
             return false;
         }
 
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        glFuncs.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     return true;
 }
@@ -534,8 +551,10 @@ void GQSingleFBO::drawBuffer( int which )
     assert(_bound_guid == _guid);
 
     _current_color_attachment = which;
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, _gl_target, _color_attachments[which]->id(), 0);
-    glDrawBuffer( GL_COLOR_ATTACHMENT0_EXT);
+    QOpenGLExtraFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _gl_target, _color_attachments[which]->id(), 0);
+    GLenum render_targets[] = { GL_COLOR_ATTACHMENT0 };
+    glFuncs.glDrawBuffers(1, render_targets);
 }
 
 void GQSingleFBO::drawToAllBuffers()

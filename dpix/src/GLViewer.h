@@ -28,7 +28,7 @@ class NPRLight;
 class Session;
 class Console;
 
-class GLViewer : public QGLViewer
+class GLViewer : public QGLViewer, protected QOpenGLExtraFunctions
 {
     Q_OBJECT
 
@@ -58,7 +58,7 @@ public:
     static const QString lightPresetNames[];
 
 public:
-    GLViewer( QWidget* parent = 0 );
+    GLViewer( QWidget* parent = nullptr );
 
     void setNPR( NPRRenderer* renderer, NPRScene* npr_scene );
     void finishInit();
@@ -83,6 +83,7 @@ public slots:
     virtual void initFromDOMElement(const QDomElement& element);
 
 protected:
+    virtual void initializeGL();
     virtual void draw();
     virtual void resizeGL( int width, int height );
     virtual void mousePressEvent( QMouseEvent* e );

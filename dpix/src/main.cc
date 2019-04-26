@@ -76,6 +76,14 @@ int main( int argc, char** argv )
     QString save_and_quit_file;
 
     QApplication app(argc, argv);
+
+    QSurfaceFormat format;
+    format.setVersion(2, 1);
+    format.setAlphaBufferSize(8);
+    format.setSamples(8);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(format);
+
     QDir shaders_dir = findShadersDirectory(app.applicationDirPath());
     QDir working_dir;
     // As a convenience, set the working directory to libnpr

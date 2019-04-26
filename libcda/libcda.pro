@@ -19,6 +19,8 @@ else {
 	}
 	else {
 		DEFINES += LINUX
+                QMAKE_LFLAGS += -fopenmp
+                QMAKE_CXXFLAGS += -fopenmp
 	}
 }
 

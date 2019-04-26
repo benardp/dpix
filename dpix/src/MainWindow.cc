@@ -9,13 +9,14 @@ See the COPYING file for details.
 
 \*****************************************************************************/
 
+#include "GLViewer.h"
+
 #include <QtGui>
 #include <QFileDialog>
 #include <QRegExp>
 #include <QMessageBox>
 #include <QColorDialog>
 
-#include "GLViewer.h"
 #include "MainWindow.h"
 #include "NPRSettings.h"
 #include "NPRRendererStandard.h"
@@ -58,8 +59,6 @@ MainWindow::MainWindow( )
 
 MainWindow::~MainWindow()
 {
-    clearRenderers();
-    delete _npr_scene;
 }
 
 void MainWindow::init( const QDir& working_dir, const QString& scenename )
@@ -156,6 +155,9 @@ void MainWindow::closeEvent( QCloseEvent* event )
     }
 
     settings.sync();
+
+    clearRenderers();
+    delete _npr_scene;
 
     event->accept();
 }

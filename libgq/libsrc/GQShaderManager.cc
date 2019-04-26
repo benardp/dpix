@@ -19,6 +19,7 @@ See the COPYING file for details.
 #include <QDomElement>
 #include <QDomNode>
 #include <QFile>
+#include <QList>
 #include <QTextStream>
 
 // GQShaderRef
@@ -76,32 +77,37 @@ int GQShaderRef::uniformLocationExistsCheck( const QString& name ) const
 
 bool GQShaderRef::setUniform1f( const QString& name, float value ) const
 {
-    glUniform1f(uniformLocationExistsCheck(name), value );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform1f(uniformLocationExistsCheck(name), value );
     return true;
 }
 
 bool GQShaderRef::setUniform1i( const QString& name, int value ) const
 {
-    glUniform1i(uniformLocationExistsCheck(name), value );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform1i(uniformLocationExistsCheck(name), value );
     return true;
 }
 
 bool GQShaderRef::setUniform2f( const QString& name, float a, float b ) const
 {
-    glUniform2f(uniformLocationExistsCheck(name), a, b );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform2f(uniformLocationExistsCheck(name), a, b );
     return true;
 }
 
 bool GQShaderRef::setUniform3f( const QString& name, float a, float b, 
                                 float c) const
 {
-    glUniform3f(uniformLocationExistsCheck(name), a, b, c);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform3f(uniformLocationExistsCheck(name), a, b, c);
     return true;
 }
 
 bool GQShaderRef::setUniform3fv( const QString& name, const float* value ) const
 {
-    glUniform3fv(uniformLocationExistsCheck(name), 1, value );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform3fv(uniformLocationExistsCheck(name), 1, value );
     return true;
 }
 
@@ -109,27 +115,25 @@ bool GQShaderRef::setUniform3fv( const QString& name, const float* value ) const
 bool GQShaderRef::setUniform4f( const QString& name, float a, float b, 
                                 float c, float d ) const
 {
-    glUniform4f(uniformLocationExistsCheck(name), a, b, c, d );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform4f(uniformLocationExistsCheck(name), a, b, c, d );
     return true;
 }
 
 bool GQShaderRef::setUniform4fv( const QString& name, const float* value ) const
 {
-    glUniform4fv(uniformLocationExistsCheck(name), 1, value );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniform4fv(uniformLocationExistsCheck(name), 1, value );
     return true;
 }
 
 bool GQShaderRef::setUniformMatrix4fv( const QString& name, const float* value ) const
 {
     const bool transpose = false;
-    glUniformMatrix4fv(uniformLocationExistsCheck(name), 1, transpose, value );
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUniformMatrix4fv(uniformLocationExistsCheck(name), 1, transpose, value );
     return true;
 }
-
-/*bool GQShaderRef::setUniformXform( const QString& name, const xform& xf ) const
-{
-	
-}*/
 
 bool GQShaderRef::setUniformMatrixUpper3x3( const QString& name, const xform& xf ) const
 {
@@ -138,7 +142,8 @@ bool GQShaderRef::setUniformMatrixUpper3x3( const QString& name, const xform& xf
 	for (int c = 0; c < 3; c++)
 		for (int r = 0; r < 3; r++)
 			mat[r + c*3] = xf(r,c);
-	glUniformMatrix3fv(uniformLocationExistsCheck(name), 1, transpose, mat );
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glUniformMatrix3fv(uniformLocationExistsCheck(name), 1, transpose, mat );
     return true;
 }
 
@@ -159,7 +164,8 @@ bool GQShaderRef::setUniformVec3Array( const QString& name, const QVector<vec>& 
 					 qPrintable(name), i, num_to_set - i);
 			return false;
 		}
-		glUniform3fv(loc, 1, v[i]);
+                QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+                glFuncs.glUniform3fv(loc, 1, v[i]);
 	}
 	return true;
 }	
@@ -181,7 +187,8 @@ bool GQShaderRef::setUniformVec2Array( const QString& name, const QVector<vec2>&
 					 qPrintable(name), i, num_to_set - i);
 			return false;
 		}
-		glUniform2fv(loc, 1, v[i]);
+                QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+                glFuncs.glUniform2fv(loc, 1, v[i]);
 	}
 	return true;
 }	
@@ -228,15 +235,16 @@ int                     GQShaderManager::_current_program_ref_count = 0;
 
 void GQShaderManager::deinitialize()
 {
-    glUseProgram(0);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUseProgram(0);
 
     for (int i = 0; i < _programs.size(); i++)
     {
-        glDeleteProgram(_programs[i]);
+        glFuncs.glDeleteProgram(_programs[i]);
     }
     for (int i = 0; i < _shaders.size(); i++)
     {
-        glDeleteShader(_shaders[i]);
+        glFuncs.glDeleteShader(_shaders[i]);
     }
 
     _program_hash.clear();
@@ -262,11 +270,7 @@ void GQShaderManager::checkHardwareCompatibility()
 
 void GQShaderManager::initialize()
 {
-    reportGLError(__FILE__,__LINE__);
-
     checkHardwareCompatibility();
-
-    reportGLError(__FILE__,__LINE__);
 
     if (_status == GQ_SHADERS_OK) 
         qFatal("GQShaderManager::initialize() called on initialized object");
@@ -287,10 +291,10 @@ void GQShaderManager::initialize()
 
     file.close();
 
-    reportGLError(__FILE__,__LINE__);
-
     QDomElement shader_root = shader_doc.documentElement();
     QDomElement program_element = shader_root.firstChildElement();
+
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     while (!program_element.isNull())
     {
         assert(program_element.tagName() == "program");
@@ -300,7 +304,7 @@ void GQShaderManager::initialize()
         // make sure we haven't seen a program with the same name already
         assert( _program_hash.value(program_name, -1) == -1 );
 
-        GLuint program_handle = glCreateProgram();
+        GLuint program_handle = glFuncs.glCreateProgram();
 
         QDomElement shader_element = program_element.firstChildElement();
         while(!shader_element.isNull())
@@ -322,7 +326,7 @@ void GQShaderManager::initialize()
             }
             else
                 assert(0);
-            GLuint shader_handle = glCreateShader(gl_type);
+            GLuint shader_handle = glFuncs.glCreateShader(gl_type);
 
             int num_source_files = 0;
             QByteArray source_files[10];
@@ -333,30 +337,30 @@ void GQShaderManager::initialize()
                 assert(source_element.tagName() == "source");
 		
                 QString shaderfile = loadShaderFile(program_name, source_element.attribute("filename"));
-                source_files[num_source_files] = shaderfile. toLatin1();
+                source_files[num_source_files] = shaderfile.toLatin1();
                 p_source_files[num_source_files] = source_files[num_source_files].data();
                 num_source_files++;
 
                 source_element = source_element.nextSiblingElement();
             }
 
-            glShaderSource( shader_handle, num_source_files, (const GLchar**)(p_source_files), NULL);
+            glFuncs.glShaderSource( shader_handle, num_source_files, (const GLchar**)(p_source_files), NULL);
 
-            glCompileShader( shader_handle );
+            glFuncs.glCompileShader( shader_handle );
             shaderInfoLog( QString(program_name + ", " + shader_type), shader_handle );
 
             _shaders.push_back(shader_handle);
 
-            glAttachShader(program_handle, shader_handle);
+            glFuncs.glAttachShader(program_handle, shader_handle);
 
             shader_element = shader_element.nextSiblingElement();
         }
 
-        glLinkProgram( program_handle );
+        glFuncs.glLinkProgram( program_handle );
 
         // The program info log is redundant with the shader info logs, 
         // at least on windows. 
-        //programInfoLog( program_name, program_handle);
+        programInfoLog( program_name, program_handle);
 
         _program_hash.insert(program_name, _programs.size());
         _programs.push_back( program_handle );
@@ -394,8 +398,6 @@ QString GQShaderManager::loadShaderFile( const QString& programname, const QStri
 
 GQShaderRef GQShaderManager::bindProgram( const QString& name )
 {
-    reportGLError(__FILE__,__LINE__);
-
     if (_current_program_ref_count > 0)
     {
         unbindProgram(_current_program_ref_guid);
@@ -412,11 +414,12 @@ GQShaderRef GQShaderManager::bindProgram( const QString& name )
     assert( _bound_textures.isEmpty() );
 
     GLuint program_handle = _programs[program_index];
-    glUseProgram(program_handle);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUseProgram(program_handle);
     _current_program = program_index;
     _current_program_name = name;
 
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 
     incProgramRefGuid();
     _current_program_ref_count = 1;
@@ -428,7 +431,8 @@ void GQShaderManager::unbindProgram( int program_ref_guid )
 {
     if ( _current_program >= 0 && program_ref_guid == _current_program_ref_guid )
     {
-        glUseProgram(0);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glUseProgram(0);
         for (int i = 0; i < _bound_textures.size(); i++)
         {
             glActiveTexture(GL_TEXTURE0 + i);
@@ -452,10 +456,11 @@ int GQShaderManager::uniformLocation(int program_ref_guid,
     if (_current_program >= 0 && 
         _current_program_ref_guid == program_ref_guid)
     {
-        loc = glGetUniformLocation(_programs[_current_program], 
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        loc = glFuncs.glGetUniformLocation(_programs[_current_program],
                                    qPrintable(name) );
        
-        reportGLError(__FILE__,__LINE__);
+        reportGLError();
     }
     return loc;
 }
@@ -467,9 +472,10 @@ int GQShaderManager::attribLocation(int program_ref_guid,
     if (_current_program >= 0 && 
         _current_program_ref_guid == program_ref_guid)
     {
-        loc = glGetAttribLocation(_programs[_current_program], 
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        loc = glFuncs.glGetAttribLocation(_programs[_current_program],
                                   qPrintable(name) );
-        reportGLError(__FILE__,__LINE__);
+        reportGLError();
     }
     return loc;
 }
@@ -513,12 +519,13 @@ bool GQShaderManager::bindNamedTexture(int program_ref_guid,
             _bound_textures.push_back(texture);
         }
 
-        glUniform1i( loc, tex_unit ); 
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glUniform1i( loc, tex_unit );
         glActiveTexture( GL_TEXTURE0 + tex_unit );
         texture->bind();
 
         //qWarning("binding %s on unit %d\n", qPrintable(name), tex_unit);
-        reportGLError(__FILE__,__LINE__);
+        reportGLError();
         return true;
     }
     return false;
@@ -546,8 +553,9 @@ void GQShaderManager::decRef( int program_ref_guid )
 int GQShaderManager::filterWarnings( QStringList& log )
 {
     int num_filtered = 0;
-    QStringList level_0_warnings = QStringList() << 
-        QString("WARNING: vertex shader writes varying '\\w+' which is not active.");
+    QStringList level_0_warnings = QStringList() <<
+        QString("WARNING: vertex shader writes varying '\\w+' which is not active.") <<
+        QString("WARNING: Output of vertex shader '\\w+' not read by fragment shader");
     QList<QRegExp> level_0_rx;
     for (int i = 0; i < level_0_warnings.size(); i++)
     {
@@ -587,12 +595,13 @@ void GQShaderManager::shaderInfoLog( const QString& filename, GLuint obj)
     GLint charsWritten  = 0;
     char *infoLog;
 
-    glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
     if (infologLength > 1)
     {
         infoLog = (char *)malloc(infologLength);
-        glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
+        glFuncs.glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
         QStringList list = QString(infoLog).trimmed().split("\n");
         _total_filtered_warnings += filterWarnings(list);
         if (list.size() > 0) 
@@ -610,12 +619,13 @@ void GQShaderManager::programInfoLog( const QString& filename, GLuint obj)
     GLint charsWritten  = 0;
     char *infoLog;
 
-    glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glGetProgramiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
     if (infologLength > 1)
     {
         infoLog = (char *)malloc(infologLength);
-        glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
+        glFuncs.glGetProgramInfoLog(obj, infologLength, &charsWritten, infoLog);
 
         QStringList list = QString(infoLog).trimmed().split("\n");
         _total_filtered_warnings += filterWarnings(list);
@@ -698,13 +708,14 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
         "error: geometry shader parameter \"%1\" has unrecognized value \"%2\" in program %3\n";
 
     QString input_type = element.attribute("input_type");
+    QOpenGLExtraFunctions glFuncs(QOpenGLContext::currentContext());
     if (!input_type.isEmpty())
     {
         int gl_type = translateStringToGLType(input_type);
         if (gl_type >= 0)
         {
-            glProgramParameteriEXT(program_handle, GL_GEOMETRY_INPUT_TYPE_EXT, gl_type);
-            reportGLError(__FILE__,__LINE__);
+            glFuncs.glProgramParameteri(program_handle, GL_GEOMETRY_INPUT_TYPE_EXT, gl_type);
+            reportGLError();
         }
         else
         {
@@ -725,8 +736,8 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
         {
             // Currently, only POINTS, LINE_STRIP, and TRIANGLE_STRIP are supported
             // as output types. 
-            glProgramParameteriEXT(program_handle, GL_GEOMETRY_OUTPUT_TYPE_EXT, gl_type);
-            reportGLError(__FILE__,__LINE__);
+            glFuncs.glProgramParameteri(program_handle, GL_GEOMETRY_OUTPUT_TYPE_EXT, gl_type);
+            reportGLError();
         }
         else
         {
@@ -745,8 +756,8 @@ void GQShaderManager::setGeometryShaderProgramParams(const QString& program_name
         int vertices = vertices_out.toInt();
         if (vertices > 0)
         {
-            glProgramParameteriEXT(program_handle, GL_GEOMETRY_VERTICES_OUT_EXT, vertices);
-            reportGLError(__FILE__,__LINE__);
+            glFuncs.glProgramParameteri(program_handle, GL_GEOMETRY_VERTICES_OUT_EXT, vertices);
+            reportGLError();
         }
         else
         {

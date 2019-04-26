@@ -16,6 +16,7 @@ See the COPYING file for details.
 #include "NPRScene.h"
 #include "NPRLight.h"
 #include "NPRStyle.h"
+#include "NPRGLDraw.h"
 #include "GQStats.h"
 #include "Session.h"
 #include <XForm.h>
@@ -68,6 +69,15 @@ void GLViewer::resetView()
         _npr_scene->setCameraTransform(cam_xf);
         showEntireScene();
     }
+}
+
+void GLViewer::initializeGL()
+{
+    initializeOpenGLFunctions();
+    qDebug() << "version: "
+                 << QLatin1String(reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+    qDebug() << "GLSL version: "
+                 << QLatin1String(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)));
 }
 
 void GLViewer::setNPR( NPRRenderer* renderer, NPRScene* npr_scene )
@@ -180,12 +190,14 @@ void GLViewer::draw()
     if (in_draw_function)
         return; // recursive draw
 
+    NPRGLDraw::clearGLScreen(vec(1,1,1), 1);
+
     if (!(_visible && _inited && _renderer && _npr_scene))
         return;
     
     in_draw_function = true;
 
-    reportGLError(__FILE__,__LINE__);
+    NPRGLDraw::handleGLError(__FILE__,__LINE__);
 
     GQStats& perf = GQStats::instance();
     if (_reset_timers_each_frame)
@@ -211,7 +223,7 @@ void GLViewer::draw()
         perf.updateView();
     }
 
-    reportGLError(__FILE__,__LINE__);
+    NPRGLDraw::handleGLError(__FILE__,__LINE__);
 
     in_draw_function = false;
 }
@@ -387,5 +399,3 @@ void GLViewer::initFromDOMElement(const QDomElement& element)
         _light_depth = light.attribute("depth").toFloat();
     }
 }
-
-

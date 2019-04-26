@@ -70,11 +70,11 @@ void Console::installMsgHandler()
 void Console::removeMsgHandler()
 {
     assert(_current_msg_console == this);
-    qInstallMessageHandler( msgHandler );
+    qInstallMessageHandler( 0 );
     _current_msg_console = 0;
 }
 
-void Console::msgHandler( QtMsgType type, const QMessageLogContext &context, const QString &msg )
+void Console::msgHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     if (type == QtFatalMsg)
     {

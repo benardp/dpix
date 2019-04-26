@@ -249,7 +249,8 @@ void NPRGLDraw::setPerModelPolygonUniforms( const GQShaderRef* shader, const NPR
         style->transfer(NPRStyle::FILL_FADE).toArray(transfer);
         transfer[0] = transfer[0] * (1.0 - selection_scale) + selection_scale;
         transfer[1] = transfer[1] * (1.0 - selection_scale) + selection_scale;
-        glUniform4fv(shader->uniformLocation("transfer_fade"), 1, transfer);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glUniform4fv(shader->uniformLocation("transfer_fade"), 1, transfer);
     }
 }
 
@@ -524,7 +525,7 @@ int NPRGLDraw::drawDepthBufferFBO(const NPRScene& scene,
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,fbo.width(), fbo.height());
 
-    reportGLError(__FILE__,__LINE__);
+    handleGLError(__FILE__,__LINE__);
 	
     NPRGLDraw::clearGLState();
     GQShaderRef shader = GQShaderManager::bindProgram("float_depth_buffer");
@@ -552,10 +553,10 @@ void NPRGLDraw::clearGLScreen(const vec& color, float depth)
 {
     glDepthMask(GL_TRUE);
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-    glClearColor(color[0], color[1], color[2], 0.0);
+    glClearColor(color[0], color[1], color[2], 1.0);
     glClearDepth(depth);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    reportGLError(__FILE__,__LINE__);
+    handleGLError(__FILE__,__LINE__);
 }
 
 void NPRGLDraw::clearGLDepth(float depth)
@@ -567,7 +568,7 @@ void NPRGLDraw::clearGLDepth(float depth)
 
 void NPRGLDraw::clearGLState()
 {
-    reportGLError(__FILE__,__LINE__);
+    handleGLError(__FILE__,__LINE__);
 
     glDisable(GL_DITHER);
     glDisable(GL_BLEND);
@@ -583,7 +584,8 @@ void NPRGLDraw::clearGLState()
     glDisable(GL_CULL_FACE);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
-    glUseProgram(0);
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+    glFuncs.glUseProgram(0);
 
     for (int i = 0; i < 8; i++)
     {
@@ -594,7 +596,7 @@ void NPRGLDraw::clearGLState()
     }
     glActiveTexture(GL_TEXTURE0);
 
-    reportGLError(__FILE__,__LINE__);
+    handleGLError(__FILE__,__LINE__);
 }
 
 void NPRGLDraw::setUniformSSParams(const GQShaderRef& shader,
@@ -634,23 +636,24 @@ void NPRGLDraw::setUniformViewParams(const GQShaderRef& shader)
     glGetFloatv(GL_PROJECTION_MATRIX, proj);
 
     int viewport_id = shader.uniformLocation("viewport");
+    QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
     if (viewport_id >= 0)
-        glUniform4fv(viewport_id, 1, viewport);
+        glFuncs.glUniform4fv(viewport_id, 1, viewport);
 
     int modelview_id = shader.uniformLocation("modelview");
     if (modelview_id >= 0)
-        glUniformMatrix4fv(modelview_id, 1, GL_FALSE, mv);
+        glFuncs.glUniformMatrix4fv(modelview_id, 1, GL_FALSE, mv);
 
     int projection_id = shader.uniformLocation("projection");
     if (projection_id >= 0)
-        glUniformMatrix4fv(projection_id, 1, GL_FALSE, proj);
+        glFuncs.glUniformMatrix4fv(projection_id, 1, GL_FALSE, proj);
 
     int inverse_projection_id = shader.uniformLocation("inverse_projection");
     if (inverse_projection_id >= 0)
     {
         XForm<float> inverse_projection = XForm<float>(proj);
         invert(inverse_projection);
-        glUniformMatrix4fv(inverse_projection_id, 1, GL_FALSE, inverse_projection);
+        glFuncs.glUniformMatrix4fv(inverse_projection_id, 1, GL_FALSE, inverse_projection);
     }
 }
 

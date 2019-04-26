@@ -15,9 +15,10 @@ See the COPYING file for details.
 #ifndef _GQ_INCLUDE_H_
 #define _GQ_INCLUDE_H_
 
+#include <QOpenGLExtraFunctions>
+
 #ifdef DARWIN
-#   include <OpenGL/gl.h>
-#   include <OpenGL/glu.h>
+#    include <glu.h>
 #endif
 #ifdef LINUX
 #    include <QVariant>
@@ -26,7 +27,6 @@ See the COPYING file for details.
 #    include <QEvent>
 #    include <QComboBox>
 #    include <QMessageBox>
-#    include <GLee.h>
 #    include <GL/glu.h>
 #    include <QtGlobal>
 #    include <QDir>
@@ -39,16 +39,10 @@ See the COPYING file for details.
 #ifdef WIN32
 #    define NOMINMAX
 #	 include <windows.h>
-#    include <GLee.h>
 #    include <GL/glu.h>
 #endif
 
 #include <QtGlobal>
-
-//#define GQ_DEBUGGING_LEVEL_REALLY_VERBOSE
-//#define GQ_DEBUGGING_LEVEL_VERBOSE
-#define GQ_DEBUGGING_LEVEL_QUIET
-//#define GQ_DEBUGGING_LEVEL_SILENT
 
 #include <Vec.h>
 #include <XForm.h>
@@ -84,18 +78,21 @@ static inline XForm<T> transpose(const XForm<T> &xf)
                     xf[3], xf[7], xf[11], xf[15]);
 }
 
-inline void reportGLError(const char* filename, int line)
+inline void reportGLError()
 {
     GLint error = glGetError();
     if (error != 0)
     {
-        qCritical("GL Error: %s in %s (l. %d)\n", gluErrorString(error), filename, line);
+        qCritical("GL Error: %s\n", gluErrorString(error));
     }
 }
 
 #ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <float.h>
 #define isnan _isnan
+#define isinf(x) (!_finite(x))
 #else
 #include <cmath>
 using std::isnan;

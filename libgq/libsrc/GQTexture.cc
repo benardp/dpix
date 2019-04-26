@@ -184,7 +184,8 @@ void GQTexture2D::setAnisotropicFiltering(bool enable) const
 void GQTexture2D::generateMipmaps()
 {
 	bind();
-	glGenerateMipmap(_target);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glGenerateMipmap(_target);
 	setMipmapping(true);
 	unbind();
 }
@@ -326,7 +327,7 @@ bool GQTexture3D::create(int width, int height, int depth,
 bool GQTexture3D::genTexture(int internal_format, int format, 
                              int type, const void *data)
 {
-    reportGLError(__FILE__,__LINE__);
+    reportGLError();
 
     int target = GL_TEXTURE_3D;
     int wrap_mode = GL_REPEAT;
@@ -397,7 +398,8 @@ void GQTexture3D::setAnisotropicFiltering(bool enable) const
 void GQTexture3D::generateMipmaps()
 {
 	bind();
-	glGenerateMipmap(GL_TEXTURE_3D);
+        QOpenGLFunctions glFuncs(QOpenGLContext::currentContext());
+        glFuncs.glGenerateMipmap(GL_TEXTURE_3D);
 	setMipmapping(true);
 	unbind();
 }
